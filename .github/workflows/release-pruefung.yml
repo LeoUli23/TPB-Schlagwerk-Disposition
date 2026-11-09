@@ -35,3 +35,11 @@ jobs:
           cd werkzeug
           "$RUNNER_TEMP/gitleaks" git . --log-opts="--all" --config .gitleaks.toml --redact --no-banner --exit-code 1
           "$RUNNER_TEMP/gitleaks" dir . --config .gitleaks.toml --redact --no-banner --exit-code 1
+
+      - name: Kein Abruf bei fremden Servern (Schriften und Bibliotheken nur aus dem eigenen Ordner)
+        working-directory: werkzeug
+        run: |
+          if grep -nE '(src|href)=["'"'"']https?://' index.html; then
+            echo "::error title=Fremder Server::index.html lädt etwas von außen; Schriften nach schrift/, Bibliotheken nach bibliothek/."
+            exit 1
+          fi
