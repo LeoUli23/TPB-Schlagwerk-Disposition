@@ -10,5 +10,5 @@ Bei jedem Pull Request läuft „Release Prüfung“ mit Gitleaks (`.gitleaks.to
 
 - Änderungen nur nach Leos Go als Pull Request auf eigenem Branch; Leo mergt, Claude mergt nie.
 - Keine Geheimwerte, keine personenbezogenen Daten in diesem öffentlichen Repository.
-- Offen: Die Seite lädt noch Schriften von Google Fonts und eine Bibliothek von cdnjs; anders als App und Bühnenplaner (F-032) noch nicht selbst ausgeliefert.
+- Schriften (Inter, Space Grotesk) aus `schrift/`, jsPDF aus `bibliothek/`, jeweils mit Lizenzdatei; nie von Google Fonts oder CDNs laden (wie F-032). Die Prüfung schlägt fehl, wenn index.html eine fremde Adresse lädt.
 - Gedächtnis-Dokumente schreibt nur der App-Chat (siehe CLAUDE.md der TPB-App).
