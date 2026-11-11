@@ -307,7 +307,7 @@ function renderLibrary(){
     div.className="lib-item"+(on?" on":"");
     div.onclick=()=>toggleProgram(p.t);
     div.innerHTML=`<div class="lib-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></div>
-      <div class="lib-meta"><div class="t">${p.t}</div><div class="s">${p.i.filter(x=>x!=="Pauken").length} Instrumente${p.i.includes("Pauken")?" · Pauken":""}</div></div>`;
+      <div class="lib-meta"><div class="t">${h(p.t)}</div><div class="s">${p.i.filter(x=>x!=="Pauken").length} Instrumente${p.i.includes("Pauken")?" · Pauken":""}</div></div>`;
     list.appendChild(div);
   });
   document.getElementById('libCnt').textContent = `${LIBRARY.length} Stücke`;
@@ -317,7 +317,7 @@ function renderProgram(){
   const box=document.getElementById('progBox');
   document.getElementById('progCnt').textContent = `${state.program.length} ${state.program.length===1?"Stück":"Stücke"}`;
   if(state.program.length===0){ box.innerHTML=`<div class="prog-empty">Wähle links Stücke aus, um die Instrumentenliste zu erzeugen.</div>`; return; }
-  const chips=state.program.map(t=>`<span class="chip">${t}<button title="Entfernen" onclick="toggleProgram('${t.replace(/'/g,"\\'")}')">×</button></span>`).join("");
+  const chips=state.program.map(t=>`<span class="chip">${h(t)}<button title="Entfernen" onclick="toggleProgram('${esc(t)}')">×</button></span>`).join("");
   box.innerHTML=`<div class="chips">${chips}</div>`;
 }
 
@@ -346,15 +346,15 @@ function renderInstruments(){
       row.className="ins-row"+(on?"":" off");
       row.style.setProperty('--rowc', FAM_COLOR[f]);
       if(on) row.style.borderLeftColor=FAM_COLOR[f];
-      const srcTxt = item.custom ? "" : `<span class="src">${item.sources.length} Stück${item.sources.length>1?"e":""}: ${item.sources.map(shortTitle).join(", ")}</span>`;
+      const srcTxt = item.custom ? "" : `<span class="src">${item.sources.length} Stück${item.sources.length>1?"e":""}: ${h(item.sources.map(shortTitle).join(", "))}</span>`;
       const tag = item.custom ? `<span class="ins-custom-tag">eigen</span>` : "";
       row.innerHTML=`
         <div class="ins-toggle" onclick="toggleIns(${item.custom?`'c${item.idx}'`:`'${esc(item.name)}'`})">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></div>
-        <div class="ins-name">${item.name}${tag}${srcTxt}</div>
+        <div class="ins-name">${h(item.name)}${tag}${srcTxt}</div>
         <div class="qty">
           <button onclick="bump(${item.custom?`'c${item.idx}'`:`'${esc(item.name)}'`},-1)">−</button>
-          <span class="v">×${qty}</span>
+          <span class="v">×${anz(qty)}</span>
           <button onclick="bump(${item.custom?`'c${item.idx}'`:`'${esc(item.name)}'`},1)">+</button>
         </div>
         ${item.custom?`<button class="ins-del" title="Löschen" onclick="delCustom(${item.idx})">×</button>`:`<span style="width:25px"></span>`}`;
@@ -376,7 +376,7 @@ function renderTimpani(){
   state.timpani.forEach((line,idx)=>{
     const div=document.createElement('div'); div.className="pk-line";
     div.innerHTML=`<span class="grip">${idx+1}</span>
-      <input type="text" value="${(line||'').replace(/"/g,'&quot;')}" placeholder="z. B. 29″ – F"
+      <input type="text" value="${h(line)}" placeholder="z. B. 29″ – F"
         oninput="state.timpani[${idx}]=this.value;save()">
       <button class="ins-del" title="Löschen" onclick="delTimpani(${idx})">×</button>`;
     list.appendChild(div);
@@ -388,10 +388,10 @@ function renderBasics(){
   const list=document.getElementById('basicList'); list.innerHTML="";
   state.basics.forEach((b,idx)=>{
     const row=document.createElement('div'); row.className="basic-row";
-    row.innerHTML=`<div class="nm">${b.name}${b.sub?`<small>${b.sub}</small>`:""}</div>
+    row.innerHTML=`<div class="nm">${h(b.name)}${b.sub?`<small>${h(b.sub)}</small>`:""}</div>
       <div class="qty">
         <button onclick="bumpBasic(${idx},-1)">−</button>
-        <span class="v">×${b.qty}</span>
+        <span class="v">×${anz(b.qty)}</span>
         <button onclick="bumpBasic(${idx},1)">+</button>
       </div>`;
     list.appendChild(row);
@@ -399,7 +399,11 @@ function renderBasics(){
 }
 
 function shortTitle(t){ return t.split(" – ")[0].split(" (")[0]; }
-function esc(s){ return s.replace(/'/g,"\\'"); }
+/* A10 (Härtungsplan): Alles aus dem Gerätespeicher wird nur als Text angezeigt.
+   h() maskiert für die Anzeige, esc() für den Einsatz in onclick="…('…')" (erst als Skript-Text, dann für die Seite). */
+function h(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function esc(s){ return h(String(s==null?"":s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/[\r\n\u2028\u2029]/g," ")); }
+function anz(v){ v=Math.round(+v); return isFinite(v)?Math.max(0,Math.min(999,v)):0; }
 
 function renderAll(){ renderLibrary(); renderProgram(); renderInstruments(); renderTimpani(); renderBasics(); }
 
